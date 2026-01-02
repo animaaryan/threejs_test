@@ -11,7 +11,7 @@ loader.load( 'public/models/web_logo_test.glb', function ( gltf ) {
   model = gltf.scene;
   scene.add( model );
 
-}, undefined, function ( error ) {
+}, undefined, function ( error ) { 
 
   console.error( error );
 
@@ -31,7 +31,7 @@ camera.position.z = 5;
 // Render the scene
 function animate() {
     if (model) {
-        model.rotation.x += 0.01;
+        model.rotation.x += 0.01; 
         model.rotation.y += 0.01;
     }
     renderer.render(scene, camera);
