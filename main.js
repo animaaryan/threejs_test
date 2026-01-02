@@ -7,8 +7,38 @@ const loader = new GLTFLoader();
 
 var model;
 
+// Setup a scene for the webpage
+const scene = new THREE.Scene();
+const canvas = document.getElementById("experience-canvas");
+
+// Set variables for the sizes
+const sizes = {
+  width: window.innerWidth,
+  height: window.innerHeight,
+};
+
+// Create the renderer
+const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+renderer.setSize(sizes.width, sizes.height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.5;
+
+// Load the GLB model
 loader.load('public/models/web_logo_test.glb', function (gltf) {
   model = gltf.scene;
+  model.traverse(child => {
+    if (child.isMesh) {
+      child.castShadow = true;
+      child.receiveShadow = true;
+
+      // Change material properties`
+      child.material.metalness = 0.6;
+      child.material.roughness = 0.5;
+      child.material.wireframe = true;
+    }
+  })
   scene.add(model);
 
 }, undefined, function (error) {
@@ -17,23 +47,48 @@ loader.load('public/models/web_logo_test.glb', function (gltf) {
 
 });
 
-// Set variables for the sizes
-const sizes = {
-  width: window.innerWidth,
-  height: window.innerHeight,
-};
+// Directional Light
+const sun = new THREE.DirectionalLight(0xFFFFFF, 3);
 
-// Setup a scene for the webpage
-const scene = new THREE.Scene();
-const canvas = document.getElementById("experience-canvas");
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000);
+// Add shadows
+sun.castShadow = true;
+sun.position.set(70, 80, 0);
+sun.target.position.set(35, 0, 0);
+sun.shadow.mapSize.width = 4096;
+sun.shadow.mapSize.height = 4096;
+sun.shadow.camera.left = -100;
+sun.shadow.camera.right = 100;
+sun.shadow.camera.top = 100;
+sun.shadow.camera.bottom = -100;
+sun.shadow.normalBias = 0.1;
 
-const renderer = new THREE.WebGLRenderer({ canvas: canvas });
-renderer.setSize(sizes.width, sizes.height);
-document.body.appendChild(renderer.domElement);
+scene.add(sun);
+
+const shadowHelper = new THREE.CameraHelper(sun.shadow.camera);
+scene.add(shadowHelper);
+
+const helper = new THREE.DirectionalLightHelper(sun, 0.1);
+scene.add(helper);
+
+// Create a camera
+const camera = new THREE.PerspectiveCamera(
+  75,
+  sizes.width / sizes.height,
+  0.1,
+  1000
+);
+
+// Add camera controls
+const controls = new OrbitControls(camera, canvas);
+controls.update();
 
 // Change the camera position on the Z axis
-camera.position.z = 1;
+camera.position.x = 0;
+camera.position.y = 0.4;
+camera.position.z = 0.6;
+
+camera.rotation.x = -0.5;
+
 
 // Handle window resize
 function handleResize() {
@@ -43,6 +98,7 @@ function handleResize() {
   camera.updateProjectionMatrix();
 
   renderer.setSize(sizes.width, sizes.height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 }
 
 window.addEventListener("resize", handleResize);
@@ -53,16 +109,7 @@ function animate() {
     model.rotation.x += 0.001;
     model.rotation.y += 0.001;
   }
+
   renderer.render(scene, camera);
 }
 renderer.setAnimationLoop(animate);
-
-
-// Directional Light
-const color = 0xFFFFFF;
-const intensity = 3;
-const light = new THREE.DirectionalLight(color, intensity);
-light.position.set(0, 10, 0);
-light.target.position.set(-5, 0, 0);
-scene.add(light);
-scene.add(light.target);
