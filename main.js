@@ -4,7 +4,6 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // glTF loader
 const loader = new GLTFLoader();
-
 var model;
 
 // Setup a scene for the webpage
@@ -36,7 +35,7 @@ loader.load('public/models/web_logo_test.glb', function (gltf) {
       // Change material properties`
       child.material.metalness = 0.6;
       child.material.roughness = 0.5;
-      child.material.wireframe = true;
+      // child.material.wireframe = true;
     }
   })
   scene.add(model);
@@ -52,30 +51,33 @@ const sun = new THREE.DirectionalLight(0xFFFFFF, 3);
 
 // Add shadows
 sun.castShadow = true;
-sun.position.set(70, 80, 0);
-sun.target.position.set(35, 0, 0);
-sun.shadow.mapSize.width = 4096;
-sun.shadow.mapSize.height = 4096;
+sun.shadow.mapSize.width = 2048;
+sun.shadow.mapSize.height = 2048;
 sun.shadow.camera.left = -100;
 sun.shadow.camera.right = 100;
 sun.shadow.camera.top = 100;
 sun.shadow.camera.bottom = -100;
 sun.shadow.normalBias = 0.1;
 
+// Set the sun's position
+sun.position.set(70, 80, 0);
+sun.target.position.set(35, 0, 0);
 scene.add(sun);
 
+// Add a shadow guide
 const shadowHelper = new THREE.CameraHelper(sun.shadow.camera);
 scene.add(shadowHelper);
 
+// Add a directional light guide
 const helper = new THREE.DirectionalLightHelper(sun, 0.1);
 scene.add(helper);
 
 // Create a camera
 const camera = new THREE.PerspectiveCamera(
-  75,
-  sizes.width / sizes.height,
-  0.1,
-  1000
+  75, // Field of view
+  sizes.width / sizes.height, // Camera size
+  0.1, // Near clip
+  1000 // Far clip
 );
 
 // Add camera controls
@@ -87,14 +89,14 @@ camera.position.x = 0;
 camera.position.y = 0.4;
 camera.position.z = 0.6;
 
+// Set camera rotation
 camera.rotation.x = -0.5;
-
 
 // Handle window resize
 function handleResize() {
   sizes.width = window.innerWidth;
   sizes.height = window.innerHeight;
-  camera.aspect = sizes.width / sizes.height;
+  camera.aspect = sizes.width / sizes.height; 
   camera.updateProjectionMatrix();
 
   renderer.setSize(sizes.width, sizes.height);
